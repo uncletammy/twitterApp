@@ -1,0 +1,17 @@
+<%
+	switch (streams.length){
+		case 0:
+			var streamButtonHeight = 100;
+		break;
+		case 1:
+			var streamButtonHeight = 100;
+		break;
+		default:
+			var streamButtonHeight = Math.round(100/streams.length);
+		break;
+	}
+
+	for (var i=0;i<streams.length;i++){%>
+<div class="streamButton" data-stream_id="<%= streams[i] %>" style="height:<%= streamButtonHeight %>%;width:100%"><%= streams[i] %></div>
+<%	}%>
+
