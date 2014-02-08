@@ -62,11 +62,14 @@ module.exports = {
 	},
 	newStream: function(req,res){
 		if (req.isSocket){
+
 			Tweet.startTweetStream({twit_ident:'sailsTroll',socketObject:req.socket,query:req.params.all()},function searchCB(err,results){
 					if (err){
 						return res.json({error:err})
 					} else {
 						return res.json({error:null,response:results});
+						//console.log('Got it',results.response)
+
 					}
 				})
 		} else {

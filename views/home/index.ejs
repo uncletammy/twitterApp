@@ -49,10 +49,17 @@ var view = {
                 var newStreamID = serverResponse.response;
                 console.log('Starting New Stream with name: ',newStreamID);
                 things.add('stream',{id_str:newStreamID});
-                things.renderThing('stream');
+                view.currentView = 'stream';
                 view.control.loadBottom();
             })
 
+        },
+        eatStreamMessage: function(message){
+//            var forStream = things.stream[message.forStream];
+            things.stream[message.forStream][message.id_str] = message;
+            console.log('eating this',message);
+     //       if (view.currentView === 'stream')
+                things.renderThing('stream',message.forStream)
         },
         getMyTweets: function(numberOfTweets){
             console.log('Getting',numberOfTweets,'tweets');
@@ -71,7 +78,6 @@ var view = {
                             things.renderThing('newTweet')
                     }
                     serverResponse.response.forEach(renderTweet)
-
 
                 }
             })
@@ -125,11 +131,13 @@ view.events = {
 things = {
     add: function(thingType,theThing){
         var thingHolder = things[thingType];
-
         var domID = theThing.id_str;
-        thingHolder[domID] = theThing;
+        if (thingType === 'newTweet')
+            thingHolder[domID] = theThing;
+        else
+            thingHolder[domID] = {};
 
-        console.log('Added Tweet',domID)
+        console.log('Added',thingType,domID)
 
 /*        if (view.currentView === 'listView')
             $('.volSearchBox').trigger('input');
@@ -150,7 +158,7 @@ things = {
         // if (view.currentView === 'listView')
         //     $('.volSearchBox').trigger('input');
     },
-    renderThing: function(thingType){
+    renderThing: function(thingType,whichThing){
         $('.containerTop').html('');
 
         switch (thingType){
@@ -165,9 +173,21 @@ things = {
                     $('.containerTop').append(renderedThing);
 
                 }
-
             break;
             case 'stream':
+                console.log('Rendering Stream',whichThing);
+
+                var allTweets = [];
+                for (var k in things.stream[whichThing])
+                    allTweets.push(things.stream[whichThing][k])
+
+                while (allTweets.length){
+                    var thisTweet = allTweets.pop();
+/*                    var renderedThing = view.templates.newTweet.render(thisTweet);
+                    $('.containerTop').append(renderedThing);
+*/
+                    console.log(thisTweet)
+                }
 
             break;
             default: break;
@@ -189,6 +209,7 @@ function drawApp(){
         view.bindEvents();
         view.control.getMyTweets(10);
         view.control.loadBottom();
+        socket.on('streamMessage',view.control.eatStreamMessage)
     })
 //    view.control.loadSignupView();
 }
